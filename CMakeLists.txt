@@ -1,18 +1,11 @@
-cmake_minimum_required(VERSION 2.8)
-project(ParMETIS C)
+cmake_minimum_required(VERSION 3.15)
+project(ParMETIS LANGUAGES C)
 
-
-# Search for MPI.
-# GK commented this out as it seems to be creating problems
-# include(FindMPI)
-# if(NOT MPI_FOUND)
-#   message(FATAL_ERROR "mpi is not found")
-# endif()
-# set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${MPI_COMPILE_FLAGS}")
-
+# Search for MPI
+find_package(MPI REQUIRED COMPONENTS C)
 
 # Prepare libraries.
-if(SHARED)
+if(BUILD_SHARED_LIBS)
   set(ParMETIS_LIBRARY_TYPE SHARED)
 else()
   set(ParMETIS_LIBRARY_TYPE STATIC)

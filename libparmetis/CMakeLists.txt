@@ -7,10 +7,10 @@ file(GLOB parmetis_sources *.c)
 # Create libparmetis
 add_library(parmetis ${ParMETIS_LIBRARY_TYPE} ${parmetis_sources})
 
-if(SHARED)
-  target_link_libraries(parmetis metis GKlib)
+if(BUILD_SHARED_LIBS)
+  target_link_libraries(parmetis metis GKlib MPI::MPI_C)
 endif()
- 
+
 install(TARGETS parmetis
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib

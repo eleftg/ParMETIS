@@ -16,16 +16,18 @@ option(GKRAND "enable GKRAND support" OFF)
 # Add compiler flags.
 if(MSVC)
   set(GK_COPTS "/Ox")
-  set(GK_COPTIONS "-DWIN32 -DMSC -D_CRT_SECURE_NO_DEPRECATE -DUSE_GKREGEX")
+  set(GK_COPTIONS "-DWIN32 -DMSC -D_CRT_SECURE_NO_WARNINGS -DUSE_GKREGEX")
 elseif(MINGW)
   set(GK_COPTS "-DUSE_GKREGEX")
 else()
   set(GK_COPTIONS "-DLINUX -D_FILE_OFFSET_BITS=64")
-endif(MSVC)
+endif()
+
 if(CYGWIN)
   set(GK_COPTIONS "${GK_COPTIONS} -DCYGWIN")
-endif(CYGWIN)
-if(CMAKE_COMPILER_IS_GNUCC)
+endif()
+
+if(CMAKE_C_COMPILER_ID MATCHES GNU)
 # GCC opts.
   set(GK_COPTIONS "${GK_COPTIONS} -std=c99 -fno-strict-aliasing")
 # -march=native is not a valid flag on PPC:
@@ -36,23 +38,27 @@ else()
 endif()
   if(NOT MINGW)
       set(GK_COPTIONS "${GK_COPTIONS} -fPIC")
-  endif(NOT MINGW)
+  endif()
 # GCC warnings.
   set(GK_COPTIONS "${GK_COPTIONS} -Werror -Wall -pedantic -Wno-unused-function -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unknown-pragmas -Wno-unused-label")
-elseif(${CMAKE_C_COMPILER_ID} MATCHES "Sun")
+elseif(CMAKE_C_COMPILER_ID MATCHES Sun)
 # Sun insists on -xc99.
   set(GK_COPTIONS "${GK_COPTIONS} -xc99")
-endif(CMAKE_COMPILER_IS_GNUCC)
+endif()
 
-if(${CMAKE_C_COMPILER_ID} STREQUAL "Intel")
-  set(GK_COPTIONS "${GK_COPTIONS} -xHost")
+if(CMAKE_C_COMPILER_ID MATCHES Intel)
+    if(WIN32)
+        set(GK_COPTIONS "${GK_COPTIONS} /QxHost")
+    else()
+        set(GK_COPTIONS "${GK_COPTIONS} -xHost")
   #  set(GK_COPTIONS "${GK_COPTIONS} -fast")
+    endif()
 endif()
 
 # Add support for the Accelerate framework in OS X
 if(APPLE)
   set(GK_COPTIONS "${GK_COPTIONS} -framework Accelerate")
-endif(APPLE)
+endif()
 
 # Find OpenMP if it is requested.
 if(OPENMP)
@@ -61,8 +67,8 @@ if(OPENMP)
     set(GK_COPTIONS "${GK_COPTIONS} -D__OPENMP__ ${OpenMP_C_FLAGS}")
   else()
     message(WARNING "OpenMP was requested but support was not found")
-  endif(OPENMP_FOUND)
-endif(OPENMP)
+  endif()
+endif()
 
 
 # Add various definitions.
@@ -77,50 +83,50 @@ endif(GDB)
 if(DEBUG)
   set(GK_COPTS "-Og")
   set(GK_COPTIONS "${GK_COPTIONS} -DDEBUG")
-endif(DEBUG)
+endif()
 
 if(GPROF)
   set(GK_COPTS "-pg")
-endif(GPROF)
+endif()
 
 if(NOT ASSERT)
   set(GK_COPTIONS "${GK_COPTIONS} -DNDEBUG")
-endif(NOT ASSERT)
+endif()
 
 if(NOT ASSERT2)
   set(GK_COPTIONS "${GK_COPTIONS} -DNDEBUG2")
-endif(NOT ASSERT2)
+endif()
 
 
 # Add various options
 if(PCRE)
   set(GK_COPTIONS "${GK_COPTIONS} -D__WITHPCRE__")
-endif(PCRE)
+endif()
 
 if(GKREGEX)
   set(GK_COPTIONS "${GK_COPTIONS} -DUSE_GKREGEX")
-endif(GKREGEX)
+endif()
 
 if(GKRAND)
   set(GK_COPTIONS "${GK_COPTIONS} -DUSE_GKRAND")
-endif(GKRAND)
+endif()
 
 
 # Check for features.
 check_include_file(execinfo.h HAVE_EXECINFO_H)
 if(HAVE_EXECINFO_H)
   set(GK_COPTIONS "${GK_COPTIONS} -DHAVE_EXECINFO_H")
-endif(HAVE_EXECINFO_H)
+endif()
 
 check_function_exists(getline HAVE_GETLINE)
 if(HAVE_GETLINE)
   set(GK_COPTIONS "${GK_COPTIONS} -DHAVE_GETLINE")
-endif(HAVE_GETLINE)
+endif()
 
 
 # Custom check for TLS.
 if(MSVC)
-  set(GK_COPTIONS "${GK_COPTIONS} -D__thread=__declspec(thread)")
+  set(GK_COPTIONS "${GK_COPTIONS} -D \"__thread=__declspec(thread)\"")
 
   # This if checks if that value is cached or not.
   if("${HAVE_THREADLOCALSTORAGE}" MATCHES "^${HAVE_THREADLOCALSTORAGE}$")
@@ -134,7 +140,7 @@ if(MSVC)
     endif()
   endif()
   if(NOT HAVE_THREADLOCALSTORAGE)
-    set(GK_COPTIONS "${GK_COPTIONS} -D__thread=")
+    set(GK_COPTIONS "${GK_COPTIONS} -D \"__thread=\"")
   endif()
 endif()
 
